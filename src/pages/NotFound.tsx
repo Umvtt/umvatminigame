@@ -1,12 +1,17 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { SITE } from "../site";
 
-export default function NotFound() {
+export default function NotFound({ message = "This page doesn't exist." }: { message?: string }) {
+  useEffect(() => {
+    document.title = `Not found · ${SITE.name}`;
+  }, []);
   return (
-    <main className="wrap game-page" style={{ textAlign: "center", paddingTop: 100 }}>
-      <div className="stamp-big static" aria-hidden>Void</div>
-      <h1 className="game-title">404</h1>
-      <p className="game-desc">This sheet was never drawn.</p>
-      <Link to="/" className="btn">◂ Back to index</Link>
-    </main>
+    <div className="game-page not-found">
+      <p className="eyebrow">404</p>
+      <h1 className="page-title">Nothing here</h1>
+      <p className="page-desc">{message}</p>
+      <Link to="/" className="btn">← Back to all games</Link>
+    </div>
   );
 }
