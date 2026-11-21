@@ -1,6 +1,6 @@
 # Doodad
 
-A neal.fun-style site: a colorful grid of small browser minigames.
+A neal.fun-style site: a clean grid of small browser minigames.
 Built with Vite + React + TypeScript + React Router.
 
 ## Scripts

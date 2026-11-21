@@ -1,12 +1,22 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import HeroMark from "../components/HeroMark";
+import SplitText from "../components/SplitText";
+import { SITE } from "../site";
 
-export default function NotFound() {
+export default function NotFound({ message = "This page doesn't exist." }: { message?: string }) {
+  useEffect(() => {
+    document.title = `Not found · ${SITE.name}`;
+  }, []);
   return (
-    <main className="wrap game-page" style={{ textAlign: "center", paddingTop: 100 }}>
-      <div className="stamp-big static" aria-hidden>Void</div>
-      <h1 className="game-title">404</h1>
-      <p className="game-desc">This sheet was never drawn.</p>
-      <Link to="/" className="btn">◂ Back to index</Link>
-    </main>
+    <div className="game-page not-found">
+      <div className="nf-mark"><HeroMark /></div>
+      <p className="eyebrow"><SplitText text="404" idle /></p>
+      <h1 className="page-title"><SplitText text="Nothing here" delay={0.15} /></h1>
+      <p className="page-desc fade-up" style={{ animationDelay: ".4s" }}>{message}</p>
+      <Link to="/" className="btn fade-up" style={{ animationDelay: ".5s" }} data-magnetic data-ripple>
+        <span className="back-arrow" aria-hidden>←</span> Back to all games
+      </Link>
+    </div>
   );
 }

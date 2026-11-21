@@ -1,30 +1,45 @@
 import { Link } from "react-router-dom";
 import type { Game } from "../games/types";
+import { useReveal } from "../hooks/useReveal";
 import { vars } from "../util";
 import Art from "./Art";
 
-export default function GameCard({ game, index }: { game: Game; index: number }) {
-  const fig = String(index + 1).padStart(2, "0");
+export default function GameCard({ game, order, leaving }: { game: Game; order: number; leaving?: boolean }) {
+  const playable = Boolean(game.component);
+  const ref = useReveal<HTMLDivElement>();
   const body = (
     <>
-      <i className="c tl" /><i className="c tr" /><i className="c bl" /><i className="c br" />
-      <div className="plate-head">
-        <span>FIG. {fig}</span>
-        <span>{(game.tags ?? ["misc"]).join(" / ").toUpperCase()}</span>
+      <span className="card-glow" aria-hidden />
+      <div className="card-art">
+        <Art name={game.art} />
       </div>
-      <Art name={game.art} />
-      <div className="plate-foot">
+      <div className="card-body">
+        <div className="card-meta">
+          {(game.tags ?? []).map((t) => <span key={t} className="tag">{t}</span>)}
+          {!playable && <span className="tag tag-soon">Coming soon</span>}
+        </div>
         <h3>{game.title}</h3>
         <p>{game.description}</p>
-        {!game.component && <span className="void-stamp">Under review</span>}
-        <span className="go">{game.component ? "PLAY" : "LOCKED"} <b aria-hidden>▸</b></span>
+        {playable && (
+          <span className="card-cta">
+            Play <span className="cta-arrow" aria-hidden>→</span>
+          </span>
+        )}
       </div>
     </>
   );
-  const style = vars({ "--i": index });
-  return game.component ? (
-    <Link to={`/play/${game.slug}`} className="plate" style={style}>{body}</Link>
-  ) : (
-    <div className="plate plate-soon" style={style} aria-disabled>{body}</div>
+  return (
+    <div
+      ref={ref}
+      data-key={game.slug}
+      className={`card-shell reveal ${leaving ? "is-leaving" : ""}`}
+      style={vars({ "--delay": `${Math.min(order, 8) * 80}ms` })}
+    >
+      {playable ? (
+        <Link to={`/play/${game.slug}`} className="card" data-tilt data-ripple>{body}</Link>
+      ) : (
+        <div className="card card-soon" data-tilt>{body}</div>
+      )}
+    </div>
   );
 }

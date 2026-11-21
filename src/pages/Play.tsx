@@ -1,20 +1,38 @@
-import { Suspense, lazy, useMemo } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Suspense, lazy, useEffect, useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
+import Art from "../components/Art";
 import GameFrame from "../components/GameFrame";
 import { getGame } from "../games/registry";
+import { SITE } from "../site";
+import NotFound from "./NotFound";
 
 export default function Play() {
   const { slug = "" } = useParams();
   const game = getGame(slug);
   const Component = useMemo(() => (game?.component ? lazy(game.component) : null), [game]);
 
-  if (!game || !Component) return <Navigate to="/404" replace />;
+  useEffect(() => {
+    if (game) document.title = `${game.title} · ${SITE.name}`;
+    return () => {
+      document.title = SITE.name;
+    };
+  }, [game]);
+
+  if (!game) return <NotFound message="There's no game at this address." />;
 
   return (
     <GameFrame game={game}>
-      <Suspense fallback={<p className="muted">Loading…</p>}>
-        <Component />
-      </Suspense>
+      {Component ? (
+        <Suspense fallback={<div className="loader" aria-label="Loading"><i /><i /><i /></div>}>
+          <Component />
+        </Suspense>
+      ) : (
+        <div className="center soon">
+          <div className="soon-art"><Art name={game.art} /></div>
+          <p className="muted">This game isn't ready yet. Check back soon.</p>
+          <Link to="/" className="btn" data-magnetic data-ripple>Browse other games</Link>
+        </div>
+      )}
     </GameFrame>
   );
 }

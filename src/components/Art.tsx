@@ -30,7 +30,7 @@ export const ART: Record<string, ReactElement> = {
         <path className="draw y a-burst" style={{ animationDelay: ".2s" }} pathLength={1} d="M96 26 L96 12" />
       </g>
       <path className="draw" style={d(0.5)} pathLength={1} d="M28 104 H96 M28 100 V108 M96 100 V108" />
-      <text x="62" y="102" textAnchor="middle" className="lbl">10 SEC</text>
+      <text x="62" y="97" textAnchor="middle" className="lbl">10 SEC</text>
       <path className="draw" style={d(0.6)} pathLength={1} d="M102 90 L128 80 H152" />
       <text x="154" y="78" className="lbl" textAnchor="end">A: PTR</text>
     </>
@@ -79,7 +79,7 @@ export const ART: Record<string, ReactElement> = {
         }),
       )}
       <path className="draw" style={d(0.6)} pathLength={1} d="M32 104 H116 M32 100 V108 M116 100 V108" />
-      <text x="74" y="102" textAnchor="middle" className="lbl">3 × 3</text>
+      <text x="74" y="98" textAnchor="middle" className="lbl">3 × 3</text>
       <path className="draw" style={d(0.6)} pathLength={1} d="M128 22 H150 M128 18 V26" />
       <text x="150" y="18" textAnchor="end" className="lbl">SEQ</text>
     </>

@@ -1,13 +1,14 @@
+import { useReveal } from "../hooks/useReveal";
 import { SITE } from "../site";
+import { Logo } from "./Header";
 
 export default function Footer() {
+  const ref = useReveal<HTMLElement>();
   return (
-    <footer className="tb tb-foot">
-      <div className="tb-inner">
-        <div className="tb-cell tb-fill"><small>TITLE</small>{SITE.name} — Tiny games, zero fluff</div>
-        <div className="tb-cell"><small>COST</small>FREE</div>
-        <div className="tb-cell tb-hide"><small>SIGN-UP</small>NONE</div>
-        <div className="tb-cell"><small>REV</small>A / {new Date().getFullYear()}</div>
+    <footer ref={ref} className="site-footer reveal">
+      <div className="wrap footer-inner">
+        <span className="footer-brand"><Logo size={18} /> © {new Date().getFullYear()} {SITE.name}</span>
+        <span>Free to play · No sign-up</span>
       </div>
     </footer>
   );
