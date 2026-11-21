@@ -1,4 +1,4 @@
-# Umvat Minigames
+# Doodad
 
 A neal.fun-style site: a colorful grid of small browser minigames.
 Built with Vite + React + TypeScript + React Router.

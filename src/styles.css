@@ -37,15 +37,15 @@ main { flex: 1; }
 /* header */
 .header { border-bottom: var(--b); background: var(--card); }
 .header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-.logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.02em; }
-.logo svg { transition: transform .2s; }
-.logo:hover svg { transform: rotate(-12deg) scale(1.08); }
+.logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.04em; }
+.logo svg { transition: transform .25s; overflow: visible; }
+.logo:hover svg { transform: rotate(18deg) scale(1.1); }
 .count { font-family: var(--mono); font-size: .8rem; }
 
 /* hero */
 .hero { padding: 72px 0 48px; }
 .hero h1 {
-  font-size: clamp(3rem, 11vw, 7.5rem); line-height: .95; letter-spacing: -0.04em; font-weight: 800; margin: 0 0 24px;
+  font-size: clamp(3rem, 11vw, 7.5rem); line-height: .95; letter-spacing: -0.035em; font-weight: 800; margin: 0 0 24px; font-variant-ligatures: none;
 }
 .hl { background: linear-gradient(transparent 62%, var(--yellow) 62% 92%, transparent 92%); padding: 0 .08em; }
 .hero p { font-size: 1.2rem; margin: 0 0 32px; max-width: 34ch; color: var(--muted); }
