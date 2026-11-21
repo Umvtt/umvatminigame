@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { reducedMotion } from "../fx/motion";
+import { reducedMotion } from "../fx/jelly";
 
 /** Types and deletes each phrase in turn. Pauses (showing the first phrase) when inactive. */
 export function useTypewriter(phrases: string[], active: boolean) {

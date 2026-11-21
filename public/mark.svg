@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-<polygon points="58,32 45,54.5 19,54.5 6,32 19,9.5 45,9.5" fill="#1f2328" stroke="#1f2328" stroke-width="4" stroke-linejoin="round"/>
-<circle cx="32" cy="32" r="11" fill="none" stroke="#ffffff" stroke-width="3.5"/>
-<circle cx="32" cy="32" r="4.5" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100">
+<defs><radialGradient id="g" cx="38%" cy="28%" r="80%"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#9fd0ff"/><stop offset="1" stop-color="#5b8fe0"/></radialGradient></defs>
+<path d="M14 88 C 8 58, 24 16, 60 15 C 96 16, 112 58, 106 88 Q 60 97, 14 88 Z" fill="url(#g)"/>
+<ellipse cx="46" cy="53" rx="8" ry="9.5" fill="#fff"/><ellipse cx="74" cy="53" rx="8" ry="9.5" fill="#fff"/>
+<circle cx="47" cy="55" r="4.5" fill="#2b1d3a"/><circle cx="75" cy="55" r="4.5" fill="#2b1d3a"/>
+<path d="M53 69 Q60 75 67 69" fill="none" stroke="#2b1d3a" stroke-width="3" stroke-linecap="round"/>
 </svg>

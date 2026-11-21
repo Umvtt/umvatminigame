@@ -1,6 +1,8 @@
 # Doodad
 
-A neal.fun-style site: a clean grid of small browser minigames.
+A neal.fun-style site of small browser minigames, set in a wobbly jelly world.
+Cards, buttons and the mascot are spring-physics jellies (`src/fx/jelly.ts`), the
+cursor leaves a liquid trail, and the sky follows your local time (try `?time=night`).
 Built with Vite + React + TypeScript + React Router.
 
 ## Scripts

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Roll from "../../components/Roll";
-import { reducedMotion } from "../../fx/motion";
+import { poke, reducedMotion } from "../../fx/jelly";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 const DURATION = 10;
@@ -45,7 +45,7 @@ export default function ClickSpeed() {
     for (let i = 0; i < n; i++) {
       const a = (Math.PI * 2 * i) / n + Math.random() * 0.4;
       const d = 120 + Math.random() * (big ? 220 : 140);
-      spawn(host, `confetti c${i % 3}`, {
+      spawn(host, `confetti c${i % 4}`, {
         "--dx": `${Math.cos(a) * d}px`,
         "--dy": `${Math.sin(a) * d - 60}px`,
         "--r": `${Math.random() * 720 - 360}deg`,
@@ -96,7 +96,8 @@ export default function ClickSpeed() {
       "--drift": `${Math.random() * 60 - 30}px`,
       "--rot": `${Math.random() * 30 - 15}deg`,
     }, "+1");
-    b.animate([{ scale: "0.96" }, { scale: "1" }], { duration: 160, easing: "cubic-bezier(.3,1.6,.5,1)" });
+    // Pointer presses are squished by the jelly engine; keyboard presses need a manual poke.
+    if (!e.detail) poke(b, 0.08);
   };
 
   const onClick = (e: MouseEvent<HTMLButtonElement>) => {
@@ -115,9 +116,9 @@ export default function ClickSpeed() {
   return (
     <div className="center">
       <div className="stats">
-        <div><b><Roll value={clicks} /></b><span>Clicks</span></div>
-        <div className={urgent ? "is-urgent" : ""}><b className="tabular">{left.toFixed(1)}s</b><span>Time left</span></div>
-        <div className={newBest ? "is-best" : ""}><b><Roll value={best} /></b><span>Best</span></div>
+        <div><b><Roll value={clicks} /></b><span>pokes</span></div>
+        <div className={urgent ? "is-urgent" : ""}><b className="tabular">{left.toFixed(1)}s</b><span>left</span></div>
+        <div className={newBest ? "is-best" : ""}><b><Roll value={best} /></b><span>best</span></div>
       </div>
       <div className="btn-zone" ref={fx}>
         <button
@@ -127,15 +128,16 @@ export default function ClickSpeed() {
           // Holding Enter auto-repeats clicks; only count real presses.
           onKeyDown={(e) => e.repeat && e.preventDefault()}
           disabled={locked}
-          data-ripple
+          data-jelly
+          data-goo
         >
           <span key={state} className="btn-label">
-            {state === "idle" && "Click to start"}
-            {state === "running" && "Click!"}
+            {state === "idle" && "poke to start"}
+            {state === "running" && "poke! poke!"}
             {state === "done" && (
               <>
-                {(clicks / DURATION).toFixed(1)} clicks/sec
-                <small>{locked ? "Nice!" : newBest ? "New best! Click to play again" : "Click to play again"}</small>
+                {(clicks / DURATION).toFixed(1)} pokes/sec
+                <small>{locked ? "wobble wobble…" : newBest ? "new best! poke to go again" : "poke to go again"}</small>
               </>
             )}
           </span>

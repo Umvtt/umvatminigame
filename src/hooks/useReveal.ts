@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /** Adds `.is-visible` the first time the element scrolls into view. */
-export function useReveal<T extends HTMLElement>() {
+export function useReveal<T extends HTMLElement>(onReveal?: (el: T) => void) {
   const ref = useRef<T>(null);
   useEffect(() => {
     const el = ref.current;
@@ -14,6 +14,7 @@ export function useReveal<T extends HTMLElement>() {
       ([entry]) => {
         if (entry.isIntersecting) {
           el.classList.add("is-visible");
+          onReveal?.(el);
           io.disconnect();
         }
       },

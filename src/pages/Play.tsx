@@ -18,7 +18,7 @@ export default function Play() {
     };
   }, [game]);
 
-  if (!game) return <NotFound message="There's no game at this address." />;
+  if (!game) return <NotFound message="There's no game at this address. Maybe it melted." />;
 
   return (
     <GameFrame game={game}>
@@ -29,8 +29,8 @@ export default function Play() {
       ) : (
         <div className="center soon">
           <div className="soon-art"><Art name={game.art} /></div>
-          <p className="muted">This game isn't ready yet. Check back soon.</p>
-          <Link to="/" className="btn" data-magnetic data-ripple>Browse other games</Link>
+          <p className="muted">Still setting in the fridge. Come back when it's wobbly.</p>
+          <Link to="/" className="btn" data-jelly data-goo>play something else</Link>
         </div>
       )}
     </GameFrame>
