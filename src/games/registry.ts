@@ -14,7 +14,6 @@ export const games: Game[] = [
     title: "Click Speed",
     description: "How many clicks can you land in 10 seconds?",
     art: "cursor",
-    color: "#ffc933",
     tags: ["reflex"],
     component: () => import("./click-speed"),
   },
@@ -23,7 +22,6 @@ export const games: Game[] = [
     title: "Reaction Time",
     description: "Wait for green. Click. Don't be early.",
     art: "bolt",
-    color: "#7ee0c3",
     tags: ["reflex"],
   },
   {
@@ -31,7 +29,6 @@ export const games: Game[] = [
     title: "Memory Grid",
     description: "Remember the pattern. Repeat it. Harder every round.",
     art: "grid",
-    color: "#a9b8ff",
     tags: ["memory"],
   },
   {
@@ -39,7 +36,6 @@ export const games: Game[] = [
     title: "Typing Sprint",
     description: "Type the words before the clock runs out.",
     art: "keys",
-    color: "#ff9ecb",
     tags: ["typing"],
   },
 ];
