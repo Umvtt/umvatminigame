@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { games } from "../games/registry";
 import { SITE } from "../site";
 
 /** Hex nut + crosshair mark. */
@@ -52,7 +53,9 @@ export default function Header() {
             ))}
           </span>
         </Link>
-        <span className="tagline">{SITE.tagline}</span>
+        <span className="tagline">
+          {SITE.tagline} <span className="tagline-sep">/</span> {games.filter((g) => g.component).length} playable, {games.filter((g) => !g.component).length} on the bench
+        </span>
       </div>
       <div className="scroll-progress" aria-hidden />
     </header>

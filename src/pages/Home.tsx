@@ -12,7 +12,7 @@ const isEditable = (el: EventTarget | null) =>
   el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 
 const LEAVE_MS = 220;
-const PHRASES = ["Search games", ...[...new Set(games.flatMap((g) => g.tags ?? []))].map((t) => `Try “${t}”`)];
+const PHRASES = ["Find a game", ...[...new Set(games.flatMap((g) => g.tags ?? []))].map((t) => `maybe "${t}"?`), "something quick?"];
 
 export default function Home() {
   const [q, setQ] = useState("");
@@ -86,7 +86,12 @@ export default function Home() {
     <>
       <section className="hero">
         <div className="hero-text">
-          <h1><SplitText text={SITE.name} delay={0.1} idle /></h1>
+          <h1>
+            <SplitText text={SITE.name} delay={0.1} idle />
+            <svg className="squiggle" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden>
+              <path pathLength={1} d="M4 16 C 40 6, 70 22, 110 12 S 180 4, 220 14 S 280 18, 296 8" />
+            </svg>
+          </h1>
           <p className="hero-desc fade-up" style={{ animationDelay: ".45s" }}>{SITE.description}</p>
           <label className={`search fade-up ${q ? "has-value" : ""}`} style={{ animationDelay: ".6s" }}>
             <svg className="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden>
@@ -115,17 +120,17 @@ export default function Home() {
       </section>
 
       <div className="section-head fade-up" style={{ animationDelay: ".7s" }}>
-        <h2>All games</h2>
-        <span aria-live="polite"><Roll value={filtered.length} /> of {games.length}</span>
+        <h2>The shelf</h2>
+        <span aria-live="polite"><Roll value={filtered.length} /> / {games.length}</span>
       </div>
       <section className="grid" ref={grid}>
         {shown.map((g, i) => <GameCard key={g.slug} game={g} order={i} leaving={leaving.has(g.slug)} />)}
       </section>
       {filtered.length === 0 && !leaving.size && (
         <div className="empty">
-          <span className="empty-mark" aria-hidden>⬡</span>
-          <p>No games match “{q.trim()}”.</p>
-          <button type="button" className="link-btn" onClick={() => setQ("")}>Clear search</button>
+          <span className="empty-mark" aria-hidden>?</span>
+          <p>Nothing called "{q.trim()}" on the shelf. Yet.</p>
+          <button type="button" className="link-btn" onClick={() => setQ("")}>Show everything</button>
         </div>
       )}
     </>

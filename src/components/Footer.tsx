@@ -8,7 +8,7 @@ export default function Footer() {
     <footer ref={ref} className="site-footer reveal">
       <div className="wrap footer-inner">
         <span className="footer-brand"><Logo size={18} /> © {new Date().getFullYear()} {SITE.name}</span>
-        <span>Free to play · No sign-up</span>
+        <span>No accounts. No ads. Nothing to install.</span>
       </div>
     </footer>
   );

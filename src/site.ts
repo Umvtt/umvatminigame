@@ -1,6 +1,6 @@
-// Change the site name / tagline here and it updates everywhere.
+// Change the site name / copy here and it updates everywhere.
 export const SITE = {
   name: "Doodad",
-  tagline: "Tiny games. Zero fluff.",
-  description: "A growing collection of small, sharp browser minigames. Pick one and play.",
+  tagline: "Small games, made by hand",
+  description: "Little games for when you've got five minutes and a mouse. No accounts, no ads. Just pick one.",
 };

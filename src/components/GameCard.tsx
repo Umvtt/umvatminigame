@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { games } from "../games/registry";
 import type { Game } from "../games/types";
 import { useReveal } from "../hooks/useReveal";
 import { vars } from "../util";
@@ -9,20 +10,20 @@ export default function GameCard({ game, order, leaving }: { game: Game; order: 
   const ref = useReveal<HTMLDivElement>();
   const body = (
     <>
-      <span className="card-glow" aria-hidden />
       <div className="card-art">
         <Art name={game.art} />
+        {!playable && <span className="stamp">Not yet</span>}
       </div>
       <div className="card-body">
         <div className="card-meta">
-          {(game.tags ?? []).map((t) => <span key={t} className="tag">{t}</span>)}
-          {!playable && <span className="tag tag-soon">Coming soon</span>}
+          <span className="card-no">No. {String(games.indexOf(game) + 1).padStart(2, "0")}</span>
+          <span>{(game.tags ?? []).join(", ")}</span>
         </div>
         <h3>{game.title}</h3>
         <p>{game.description}</p>
         {playable && (
           <span className="card-cta">
-            Play <span className="cta-arrow" aria-hidden>→</span>
+            Play it <span className="cta-arrow" aria-hidden>→</span>
           </span>
         )}
       </div>

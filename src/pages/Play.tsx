@@ -29,8 +29,8 @@ export default function Play() {
       ) : (
         <div className="center soon">
           <div className="soon-art"><Art name={game.art} /></div>
-          <p className="muted">This game isn't ready yet. Check back soon.</p>
-          <Link to="/" className="btn" data-magnetic data-ripple>Browse other games</Link>
+          <p className="muted">Still on the workbench. It'll be here when it's fun.</p>
+          <Link to="/" className="btn" data-magnetic data-ripple>Play something else</Link>
         </div>
       )}
     </GameFrame>

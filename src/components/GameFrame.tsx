@@ -7,7 +7,7 @@ import SplitText from "./SplitText";
 export default function GameFrame({ game, children }: { game: Game; children: ReactNode }) {
   return (
     <div className="game-page">
-      <Link to="/" className="back"><span className="back-arrow" aria-hidden>←</span> All games</Link>
+      <Link to="/" className="back"><span className="back-arrow" aria-hidden>←</span> Back to the shelf</Link>
       <h1 className="page-title"><SplitText text={game.title} delay={0.1} /></h1>
       <p className="page-desc fade-up" style={{ animationDelay: ".35s" }}>{game.description}</p>
       <div className="stage">{children}</div>
