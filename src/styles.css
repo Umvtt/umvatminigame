@@ -38,8 +38,15 @@ main { flex: 1; }
 .header { border-bottom: var(--b); background: var(--card); }
 .header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .logo { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.04em; }
-.logo svg { transition: transform .25s; overflow: visible; }
-.logo:hover svg { transform: rotate(18deg) scale(1.1); }
+.mascot { overflow: visible; }
+.mascot * { transform-box: fill-box; transform-origin: center; }
+.mascot .pupil { transition: transform .08s linear; }
+.mascot .eye { animation: blink 5s infinite; }
+.mascot .jelly { animation: jelly 3s ease-in-out infinite; }
+.logo:hover .mascot { animation: hop .5s ease-out; }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes jelly { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.04, .96); } }
+@keyframes hop { 40% { transform: translateY(-7px) scale(.95, 1.1); } 70% { transform: translateY(0) scale(1.1, .9); } }
 .count { font-family: var(--mono); font-size: .8rem; }
 
 /* hero */
@@ -47,7 +54,11 @@ main { flex: 1; }
 .hero h1 {
   font-size: clamp(3rem, 11vw, 7.5rem); line-height: .95; letter-spacing: -0.035em; font-weight: 800; margin: 0 0 24px; font-variant-ligatures: none;
 }
-.hl { background: linear-gradient(transparent 62%, var(--yellow) 62% 92%, transparent 92%); padding: 0 .08em; }
+.hl {
+  background: linear-gradient(transparent 62%, var(--yellow) 62% 92%, transparent 92%) no-repeat 0 0 / 0% 100%;
+  padding: 0 .08em; animation: draw .8s .35s cubic-bezier(.6, 0, .2, 1) forwards;
+}
+@keyframes draw { to { background-size: 100% 100%; } }
 .hero p { font-size: 1.2rem; margin: 0 0 32px; max-width: 34ch; color: var(--muted); }
 .search-wrap { position: relative; max-width: 400px; }
 .search {
@@ -63,16 +74,49 @@ main { flex: 1; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 28px; padding: 8px 0 96px; }
 .card {
   position: relative; display: flex; flex-direction: column; background: var(--c); border: var(--b); border-radius: 20px;
-  box-shadow: var(--shadow); transform: rotate(var(--tilt)); overflow: hidden;
-  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: var(--shadow); overflow: hidden;
+  transform: perspective(900px) rotate(var(--tilt)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform .15s ease-out, box-shadow .15s ease-out;
+  animation: pop .7s cubic-bezier(.2, 1.5, .4, 1) backwards;
+  animation-delay: calc(var(--i) * 90ms + 150ms);
 }
-a.card:hover { transform: translate(4px, 4px) rotate(0); box-shadow: 2px 2px 0 var(--ink); }
-a.card:active { transform: translate(6px, 6px); box-shadow: 0 0 0 var(--ink); }
+a.card:hover {
+  transform: perspective(900px) translateY(-8px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  box-shadow: 10px 14px 0 var(--ink);
+}
+a.card:active { transform: perspective(900px) translate(6px, 6px); box-shadow: 0 0 0 var(--ink); }
+.card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .5), transparent 60%);
+}
+.card:hover::after { opacity: 1; }
+@keyframes pop { from { opacity: 0; transform: perspective(900px) translateY(48px) scale(.8) rotate(-7deg); } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-7px) rotate(1.6deg); } }
+@keyframes wiggle { 0%, 100% { transform: rotate(var(--tilt)); } 25% { transform: rotate(-2.5deg) translateX(-3px); } 75% { transform: rotate(2.5deg) translateX(3px); } }
+
+/* illustrations: idle float + per-game hover animation */
+.art * { transform-box: fill-box; transform-origin: center; }
+.card .art { animation: float 4.5s ease-in-out infinite; animation-delay: calc(var(--i) * -1.1s); }
+.card:hover .a-arrow { animation: click .7s ease-in-out infinite; }
+.card:hover .a-ring { animation: ring .7s ease-in-out infinite; }
+.card:hover .a-burst { animation: burst .7s ease-out infinite; }
+.card:hover .a-bolt { animation: zap .45s steps(2, end) infinite; }
+.card:hover .a-wave { animation: wave .6s ease-in-out infinite; }
+.card:hover .a-sq { animation: lit 1.4s ease-in-out infinite; }
+.card:hover .a-key { animation: press .7s ease-in-out infinite; }
+@keyframes click { 0%, 100% { transform: translate(0, 0); } 40% { transform: translate(5px, 5px) scale(.9); } 60% { transform: translate(0, 0); } }
+@keyframes ring { 0%, 100% { transform: scale(1); } 40% { transform: scale(.92); } 60% { transform: scale(1.06); } }
+@keyframes burst { 0%, 30% { opacity: 0; transform: scale(.5); } 55% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0; transform: scale(1.4); } }
+@keyframes zap { 0% { transform: translate(-2px, 1px) rotate(-4deg); fill: #fffaf0; } 100% { transform: translate(2px, -1px) rotate(4deg); fill: #ffc933; } }
+@keyframes wave { 0%, 100% { opacity: .15; } 50% { opacity: 1; } }
+@keyframes lit { 0%, 100% { fill: #fffaf0; transform: scale(1); } 20%, 40% { fill: #4f6bff; transform: scale(1.12); } 60% { transform: scale(1); } }
+@keyframes press { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(6px); } }
 .card .art { width: 100%; height: 170px; padding: 22px 28px 10px; }
 .card-text { background: var(--card); border-top: var(--b); padding: 16px 20px 20px; flex: 1; }
 .card h3 { margin: 0 0 4px; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.03em; }
 .card p { margin: 0; color: var(--muted); font-size: .95rem; }
 .card-num { position: absolute; top: 12px; left: 16px; font-family: var(--mono); font-size: .8rem; font-weight: 500; }
+.card-soon:hover { animation: wiggle .4s ease-in-out; }
 .card-soon { background: color-mix(in srgb, var(--c) 55%, var(--paper)); }
 .card-soon .art { opacity: .8; }
 .stamp {
@@ -104,4 +148,4 @@ a.card:active { transform: translate(6px, 6px); box-shadow: 0 0 0 var(--ink); }
 .footer { border-top: var(--b); background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: .8rem; }
 .footer .wrap { padding-top: 20px; padding-bottom: 20px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::after { transition: none !important; animation: none !important; } .hl { background-size: 100% 100%; } }
