@@ -5,7 +5,7 @@ export default function GooCursor() {
   return (
     <svg className="goo" aria-hidden>
       <defs>
-        <filter id="goo-filter" x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
+        <filter id="goo-filter" filterUnits="userSpaceOnUse" x="0" y="0" width="0" height="0" colorInterpolationFilters="sRGB">
           <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur" />
           <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10" />
         </filter>

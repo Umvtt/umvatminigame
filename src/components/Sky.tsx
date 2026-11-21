@@ -1,4 +1,5 @@
 /** The sky behind everything: follows the time of day (sun, moon, stars), with slow jelly bubbles. */
+
 const STARS = Array.from({ length: 70 }, (_, i) => ({
   x: (i * 37.3) % 100,
   y: (i * 61.7) % 70,

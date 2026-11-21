@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { useSleepy, type Mood } from "../hooks/useSleepy";
 
 /**
@@ -9,8 +9,9 @@ export default function Blobby({ size = 40, mood: forced, className = "" }: { si
   const live = useSleepy();
   const mood = forced ?? live;
   const id = useId().replace(/:/g, "");
+  const blinking = useBlink();
   return (
-    <span className={`blobby bb-${mood} ${className}`} style={{ width: size, height: size * 0.84 }} data-jelly aria-hidden>
+    <span className={`blobby bb-${mood} ${blinking ? "is-blinking" : ""} ${className}`} style={{ width: size, height: size * 0.84 }} data-jelly aria-hidden>
       <svg viewBox="0 0 120 100">
         <defs>
           <radialGradient id={`bb-${id}`} cx="38%" cy="28%" r="80%">
@@ -29,11 +30,11 @@ export default function Blobby({ size = 40, mood: forced, className = "" }: { si
           <g className="bb-eyes" data-eyes>
             <g className="bb-eye">
               <ellipse cx="46" cy="53" rx="8" ry="9.5" fill="#fff" />
-              <circle className="bb-pupil" cx="46" cy="54" r="4.5" />
+              <circle className="bb-pupil" cx="46" cy="54" r="4.5" data-pupil />
             </g>
             <g className="bb-eye">
               <ellipse cx="74" cy="53" rx="8" ry="9.5" fill="#fff" />
-              <circle className="bb-pupil" cx="74" cy="54" r="4.5" />
+              <circle className="bb-pupil" cx="74" cy="54" r="4.5" data-pupil />
             </g>
           </g>
           <path className="bb-smile" d="M53 69 Q60 75 67 69" />
@@ -48,4 +49,24 @@ export default function Blobby({ size = 40, mood: forced, className = "" }: { si
       </svg>
     </span>
   );
+}
+
+/** Blink every few seconds, for a moment. Cheaper than a nonstop animation inside the svg. */
+function useBlink() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    let t: number;
+    const loop = () => {
+      t = window.setTimeout(() => {
+        setOn(true);
+        t = window.setTimeout(() => {
+          setOn(false);
+          loop();
+        }, 140);
+      }, 3500 + Math.random() * 3000);
+    };
+    loop();
+    return () => window.clearTimeout(t);
+  }, []);
+  return on;
 }

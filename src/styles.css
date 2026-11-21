@@ -13,6 +13,15 @@
 @property --mascot { syntax: "<color>"; inherits: true; initial-value: #a8d4ff; }
 @property --mascot-deep { syntax: "<color>"; inherits: true; initial-value: #5b8fe0; }
 @property --sun-c { syntax: "<color>"; inherits: true; initial-value: #ffe08a; }
+/* written every frame by fx/jelly.ts: non-inherited, so a change only restyles that one element */
+@property --js { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --jk { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --shx { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --shy { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --shr { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --inf { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --lx { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --ly { syntax: "<number>"; inherits: false; initial-value: 0; }
 
 :root {
   /* jelly flavours (fixed through the day) */
@@ -97,6 +106,7 @@ main { flex: 1 0 auto; position: relative; z-index: 2; }
   transform: scale(calc(1 + var(--js, 0)), calc(1 - var(--js, 0))) skewX(var(--jk, 0deg));
   transform-origin: 50% 100%;
 }
+.card, .big-btn, .search, .btn, .blobby { will-change: transform; }
 /* letters that puff up when the pointer gets close */
 [data-inflate] { font-weight: calc(500 + var(--inf, 0) * 400); }
 
@@ -143,11 +153,12 @@ main { flex: 1 0 auto; position: relative; z-index: 2; }
 .sun {
   position: absolute; left: var(--sun-x); top: var(--sun-y); width: 170px; height: 170px; margin: -85px 0 0 -85px; border-radius: 50%;
   background: radial-gradient(circle at 38% 34%, #fff 0, var(--sun-c) 58%);
-  box-shadow: 0 0 90px 40px var(--sun-glow);
-  transition: left 2.2s var(--ease-io), top 2.2s var(--ease-io), box-shadow 1.6s;
+  transition: left 2.2s var(--ease-io), top 2.2s var(--ease-io);
   animation: sun-wobble 9s var(--ease-io) infinite;
+  will-change: transform;
 }
-@keyframes sun-wobble { 50% { border-radius: 48% 52% 50% 50% / 52% 48% 52% 48%; scale: 1.03 0.97; } }
+.sun::before { content: ""; position: absolute; z-index: -1; inset: -120px; border-radius: 50%; background: radial-gradient(circle, var(--sun-glow) 0, transparent 66%); }
+@keyframes sun-wobble { 50% { scale: 1.03 0.97; } }
 :root[data-time="night"] .sun {
   width: 120px; height: 120px; margin: -60px 0 0 -60px;
   background:
@@ -156,7 +167,10 @@ main { flex: 1 0 auto; position: relative; z-index: 2; }
     radial-gradient(circle at 58% 28%, rgba(160, 160, 210, 0.25) 0 5%, transparent 6%),
     radial-gradient(circle at 38% 34%, #fff 0, var(--sun-c) 60%);
 }
-.stars { position: absolute; inset: 0; opacity: var(--stars); transition: opacity 2s; }
+.stars { position: absolute; inset: 0; opacity: var(--stars); transition: opacity 2s, visibility 2s; }
+/* in daylight the stars are invisible anyway: take them out of rendering entirely (after the fade) */
+:root:not([data-time="night"]):not([data-time="evening"]) .stars { visibility: hidden; }
+:root:not([data-time="night"]):not([data-time="evening"]) .stars i { animation-play-state: paused; }
 .stars i { position: absolute; border-radius: 50%; background: #fff; animation: twinkle 2.6s ease-in-out infinite alternate; }
 @keyframes twinkle { from { opacity: 0.25; scale: 0.7; } to { opacity: 1; scale: 1; } }
 .bubbles i {
@@ -205,16 +219,15 @@ main { flex: 1 0 auto; position: relative; z-index: 2; }
 
 /* ---------- mascot ---------- */
 .blobby { display: inline-block; flex: none; cursor: pointer; }
-.blobby svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.blobby svg { display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 100%; animation: bb-breathe 3.2s var(--ease-io) infinite; }
 .blobby g, .blobby ellipse, .blobby text, .blobby path { transform-box: fill-box; }
-.bb-body { transform-origin: 50% 100%; animation: bb-breathe 3.2s var(--ease-io) infinite; }
-@keyframes bb-breathe { 50% { transform: scale(1.035, 0.965); } }
-.bb-shadow { fill: rgba(20, 10, 40, 0.16); transform-origin: center; animation: bb-shadow 3.2s var(--ease-io) infinite; }
-@keyframes bb-shadow { 50% { transform: scaleX(1.05); } }
+.bb-body { transform-origin: 50% 100%; }
+@keyframes bb-breathe { 50% { scale: 1.035 0.965; } }
+.bb-shadow { fill: rgba(20, 10, 40, 0.16); }
 .bb-cheek { fill: #ff7fa8; opacity: 0.45; }
 .bb-pupil { fill: var(--ink); transform: translate(calc(var(--lx, 0) * 3.4px), calc(var(--ly, 0) * 3.6px)); transition: transform 0.12s; }
-.bb-eye { transform-origin: center; animation: blink 5.5s infinite; transition: transform 0.5s var(--ease-spring); }
-.bb-eye:nth-child(2) { animation-delay: 0.04s; }
+.bb-eye { transform-origin: center; transition: transform 0.5s var(--ease-spring); }
+.bb-awake.is-blinking .bb-eye { transform: scaleY(0.08); transition-duration: 0.07s; }
 @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.08); } }
 .bb-smile { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; transition: opacity 0.3s; }
 .bb-yawn, .bb-oh { fill: var(--ink); opacity: 0; transform-origin: center; transition: opacity 0.3s; }
@@ -227,8 +240,8 @@ main { flex: 1 0 auto; position: relative; z-index: 2; }
 @keyframes yawn { 0%, 100% { transform: scale(0.3); } 35%, 60% { transform: scale(1.1, 1.3); } }
 
 .bb-asleep .bb-eye { animation: none; transform: scaleY(0.07); }
-.bb-asleep .bb-body { animation: bb-sleep 4.2s var(--ease-io) infinite; }
-@keyframes bb-sleep { 50% { transform: scale(1.07, 0.9); } }
+.bb-asleep svg { animation: bb-sleep 4.2s var(--ease-io) infinite; }
+@keyframes bb-sleep { 50% { scale: 1.07 0.9; } }
 .bb-asleep .bb-smile { opacity: 0.6; }
 .bb-asleep .bb-z text { animation: zz 3.6s linear infinite; }
 .bb-asleep .bb-z text:nth-child(2) { animation-delay: 1.2s; }
@@ -336,7 +349,7 @@ main { flex: 1 0 auto; position: relative; z-index: 2; }
   translate: var(--shx, 0px) var(--shy, 0px);
   rotate: var(--shr, 0deg);
   transition: box-shadow 0.35s var(--ease-out);
-  animation: morph 9s var(--ease-io) infinite;
+  animation: morph 9s steps(36) infinite;
 }
 @keyframes morph {
   0%, 100% { border-radius: 30px 36px 28px 34px / 34px 28px 36px 30px; }
@@ -371,7 +384,12 @@ a.card:hover .cta-arrow { animation: nudge 0.8s var(--ease-io) infinite; }
   cursor: default;
   background: radial-gradient(130% 100% at 25% 0%, color-mix(in srgb, var(--jelly) 30%, transparent) 0%, color-mix(in srgb, var(--jelly) 55%, transparent) 60%, color-mix(in srgb, var(--jelly) 70%, transparent) 100%);
   outline: 2px dashed color-mix(in srgb, var(--jelly-deep) 45%, transparent); outline-offset: -8px;
-  animation: morph 9s var(--ease-io) infinite, slosh 2.6s var(--ease-io) infinite;
+  animation: morph 9s steps(36) infinite;
+}
+/* the slosh lives on the wrapper so it stays a cheap GPU transform */
+.card-shell.is-soon { transform-origin: 50% 100%; }
+.card-shell.is-soon.is-visible {
+  animation: drop-in 0.55s cubic-bezier(0.5, 0, 0.9, 0.6) var(--delay, 0s) backwards, slosh 2.6s var(--ease-io) infinite;
 }
 @keyframes slosh { 50% { scale: 1.015 0.985; } }
 .card-soon .card-body, .card-soon .card-meta, .card-soon p { color: color-mix(in srgb, var(--text) 80%, transparent); }
@@ -385,18 +403,18 @@ a.card:hover .cta-arrow { animation: nudge 0.8s var(--ease-io) infinite; }
 .card-setting .dots i:nth-child(3) { animation-delay: 0.3s; }
 @keyframes dot-hop { 0%, 60%, 100% { translate: 0 0; } 30% { translate: 0 -5px; } }
 .peeper { position: absolute; right: 22px; top: 18px; display: flex; gap: 4px; z-index: 2; transition: translate 0.4s var(--ease-spring); }
-.peeper i { position: relative; width: 17px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1); animation: blink 4.8s infinite; }
-.peeper i:nth-child(2) { animation-delay: 0.05s; }
-.peeper i::after {
-  content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: var(--ink);
-  translate: calc(var(--lx, 0) * 4px) calc(var(--ly, 0) * 4px);
+.peeper i {
+  position: relative; width: 17px; height: 19px; border-radius: 50%; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1); animation: blink 4.8s infinite;
+  background: radial-gradient(circle at calc(50% + var(--lx, 0) * 4px) calc(50% + var(--ly, 0) * 4px), var(--ink) 0 4px, #fff 4.6px);
 }
+.peeper i:nth-child(2) { animation-delay: 0.05s; }
 .is-shy .peeper { translate: 0 4px; }
 .is-shy:not(.is-peeking) .peeper i { scale: 1 0.7; }
 
 /* ---------- line art on jelly ---------- */
 .art { width: 100%; height: 160px; padding: 20px 22px 6px; display: block; overflow: visible; }
-.card-shell.is-visible .art { animation: float 5s var(--ease-io) infinite; animation-delay: calc(var(--delay, 0s) + 1s); }
+/* float the HTML wrapper, not the <svg>: a wrapper animates on the GPU, the svg would repaint the page every frame */
+.card-shell.is-visible .card-art { animation: float 5s var(--ease-io) infinite; animation-delay: calc(var(--delay, 0s) + 1s); }
 @keyframes float { 50% { translate: 0 -5px; } }
 .art * { fill: none; stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.35s; }
 .art g { transform-box: fill-box; transform-origin: center; }
@@ -404,7 +422,7 @@ a.card:hover .cta-arrow { animation: nudge 0.8s var(--ease-io) infinite; }
 .art .y { stroke: var(--ink); stroke-width: 2.6; }
 .art .hatch { fill: url(#hatch); }
 .art .solid { fill: color-mix(in srgb, var(--jelly) 45%, #fff); }
-.art .dash { stroke-dasharray: 3 5; animation: dash-run 6s linear infinite; }
+.art .dash { stroke-dasharray: 3 5; animation: dash-run 6s steps(120) infinite; }
 @keyframes dash-run { to { stroke-dashoffset: -80; } }
 .art text { fill: color-mix(in srgb, var(--ink) 60%, transparent); stroke: none; font: 800 7.5px var(--sans); letter-spacing: 0.06em; }
 .art text.big { font: 700 16px var(--display); fill: var(--ink); }

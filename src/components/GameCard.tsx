@@ -24,7 +24,7 @@ export default function GameCard({ game, order, leaving }: { game: Game; order: 
         <Art name={game.art} />
         {!playable && (
           <span className="peeper" data-eyes aria-hidden>
-            <i /><i />
+            <i data-pupil /><i data-pupil />
           </span>
         )}
       </div>
@@ -47,7 +47,7 @@ export default function GameCard({ game, order, leaving }: { game: Game; order: 
     <div
       ref={ref}
       data-key={game.slug}
-      className={`card-shell reveal ${leaving ? "is-leaving" : ""}`}
+      className={`card-shell reveal ${playable ? "" : "is-soon"} ${leaving ? "is-leaving" : ""}`}
       style={vars({ "--delay": `${delay}ms` })}
     >
       {playable ? (
