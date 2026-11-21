@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import GameCard from "../components/GameCard";
-import HeroMark from "../components/HeroMark";
+import Blobby from "../components/Blobby";
 import Roll from "../components/Roll";
 import SplitText from "../components/SplitText";
-import { reducedMotion } from "../fx/motion";
+import { reducedMotion } from "../fx/jelly";
 import { games } from "../games/registry";
 import { useTypewriter } from "../hooks/useTypewriter";
 import { SITE } from "../site";
@@ -12,7 +12,7 @@ const isEditable = (el: EventTarget | null) =>
   el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 
 const LEAVE_MS = 220;
-const PHRASES = ["Find a game", ...[...new Set(games.flatMap((g) => g.tags ?? []))].map((t) => `maybe "${t}"?`), "something quick?"];
+const PHRASES = ["poke around…", ...[...new Set(games.flatMap((g) => g.tags ?? []))].map((t) => `something ${t}?`), "surprise me"];
 
 export default function Home() {
   const [q, setQ] = useState("");
@@ -86,51 +86,59 @@ export default function Home() {
     <>
       <section className="hero">
         <div className="hero-text">
-          <h1>
-            <SplitText text={SITE.name} delay={0.1} idle />
-            <svg className="squiggle" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden>
-              <path pathLength={1} d="M4 16 C 40 6, 70 22, 110 12 S 180 4, 220 14 S 280 18, 296 8" />
-            </svg>
-          </h1>
+          <h1><SplitText text={SITE.name.toLowerCase()} delay={0.1} idle squishy /></h1>
           <p className="hero-desc fade-up" style={{ animationDelay: ".45s" }}>{SITE.description}</p>
-          <label className={`search fade-up ${q ? "has-value" : ""}`} style={{ animationDelay: ".6s" }}>
-            <svg className="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden>
-              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
-              <path d="M20 20l-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <div className="search-wrap hue-1 fade-up" style={{ animationDelay: ".6s" }}>
+            <svg className="drips" aria-hidden>
+              <g filter="url(#goo-soft)">
+                <rect className="drip-bar" x="22" y="0" height="10" rx="5" />
+                <circle className="drip" cx="18%" cy="6" r="6" />
+                <circle className="drip" cx="47%" cy="6" r="7" />
+                <circle className="drip" cx="78%" cy="6" r="5" />
+              </g>
             </svg>
-            <input
-              ref={input}
-              type="search"
-              placeholder={placeholder}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              onKeyDown={(e) => e.key === "Escape" && setQ("")}
-              aria-label="Search games"
-            />
-            {q ? (
-              <button type="button" className="search-clear" onClick={() => { setQ(""); input.current?.focus(); }} aria-label="Clear search">×</button>
-            ) : (
-              <kbd aria-hidden>/</kbd>
-            )}
-          </label>
+            <label className={`search ${q ? "has-value" : ""}`} data-goo>
+              <svg className="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+                <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
+                <path d="M20 20l-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <input
+                ref={input}
+                type="search"
+                placeholder={placeholder}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                onKeyDown={(e) => e.key === "Escape" && setQ("")}
+                aria-label="Search games"
+              />
+              {q ? (
+                <button type="button" className="search-clear" onClick={() => { setQ(""); input.current?.focus(); }} aria-label="Clear search">×</button>
+              ) : (
+                <kbd aria-hidden>/</kbd>
+              )}
+            </label>
+          </div>
         </div>
-        <HeroMark />
+        <div className="hero-blob">
+          <Blobby size={230} />
+          <span className="hero-hint" aria-hidden>poke me</span>
+        </div>
       </section>
 
       <div className="section-head fade-up" style={{ animationDelay: ".7s" }}>
-        <h2>The shelf</h2>
-        <span aria-live="polite"><Roll value={filtered.length} /> / {games.length}</span>
+        <h2>fresh from the fridge</h2>
+        <span aria-live="polite"><Roll value={filtered.length} /> of {games.length} jellies</span>
       </div>
       <section className="grid" ref={grid}>
         {shown.map((g, i) => <GameCard key={g.slug} game={g} order={i} leaving={leaving.has(g.slug)} />)}
       </section>
       {filtered.length === 0 && !leaving.size && (
         <div className="empty">
-          <span className="empty-mark" aria-hidden>?</span>
-          <p>Nothing called "{q.trim()}" on the shelf. Yet.</p>
-          <button type="button" className="link-btn" onClick={() => setQ("")}>Show everything</button>
+          <Blobby size={90} mood="lost" />
+          <p>No jelly called "{q.trim()}". Yet.</p>
+          <button type="button" className="btn" onClick={() => setQ("")} data-jelly data-goo>show them all</button>
         </div>
       )}
     </>
