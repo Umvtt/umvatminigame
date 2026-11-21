@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
 import type { Game } from "../games/types";
+import { useReveal } from "../hooks/useReveal";
+import { vars } from "../util";
 import Art from "./Art";
 
-export default function GameCard({ game }: { game: Game }) {
+export default function GameCard({ game, order, leaving }: { game: Game; order: number; leaving?: boolean }) {
   const playable = Boolean(game.component);
+  const ref = useReveal<HTMLDivElement>();
   const body = (
     <>
+      <span className="card-glow" aria-hidden />
       <div className="card-art">
         <Art name={game.art} />
       </div>
@@ -16,13 +20,26 @@ export default function GameCard({ game }: { game: Game }) {
         </div>
         <h3>{game.title}</h3>
         <p>{game.description}</p>
-        {playable && <span className="card-cta">Play <span aria-hidden>→</span></span>}
+        {playable && (
+          <span className="card-cta">
+            Play <span className="cta-arrow" aria-hidden>→</span>
+          </span>
+        )}
       </div>
     </>
   );
-  return playable ? (
-    <Link to={`/play/${game.slug}`} className="card">{body}</Link>
-  ) : (
-    <div className="card card-soon">{body}</div>
+  return (
+    <div
+      ref={ref}
+      data-key={game.slug}
+      className={`card-shell reveal ${leaving ? "is-leaving" : ""}`}
+      style={vars({ "--delay": `${Math.min(order, 8) * 80}ms` })}
+    >
+      {playable ? (
+        <Link to={`/play/${game.slug}`} className="card" data-tilt data-ripple>{body}</Link>
+      ) : (
+        <div className="card card-soon" data-tilt>{body}</div>
+      )}
+    </div>
   );
 }

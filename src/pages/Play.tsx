@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
+import Art from "../components/Art";
 import GameFrame from "../components/GameFrame";
 import { getGame } from "../games/registry";
 import { SITE } from "../site";
@@ -22,13 +23,14 @@ export default function Play() {
   return (
     <GameFrame game={game}>
       {Component ? (
-        <Suspense fallback={<p className="muted">Loading…</p>}>
+        <Suspense fallback={<div className="loader" aria-label="Loading"><i /><i /><i /></div>}>
           <Component />
         </Suspense>
       ) : (
-        <div className="center">
+        <div className="center soon">
+          <div className="soon-art"><Art name={game.art} /></div>
           <p className="muted">This game isn't ready yet. Check back soon.</p>
-          <Link to="/" className="btn">Browse other games</Link>
+          <Link to="/" className="btn" data-magnetic data-ripple>Browse other games</Link>
         </div>
       )}
     </GameFrame>
