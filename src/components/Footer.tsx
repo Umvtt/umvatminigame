@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="footer">
       <div className="wrap">
-        <span>© {new Date().getFullYear()} {SITE.name}</span>
-        <span>New games on the way</span>
+        <span>{SITE.name} — {new Date().getFullYear()}</span>
+        <span>Free. No sign-up. More soon.</span>
       </div>
     </footer>
   );

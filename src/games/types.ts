@@ -5,8 +5,8 @@ export type Game = {
   slug: string;
   title: string;
   description: string;
-  /** Shown on the card */
-  emoji: string;
+  /** Key of an illustration in src/components/Art.tsx */
+  art: string;
   /** Card background color */
   color: string;
   /** Lazy-loaded game component. Omit for a "coming soon" card. */

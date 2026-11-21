@@ -1,17 +1,19 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import type { Game } from "../games/types";
+import Art from "./Art";
 
-export default function GameCard({ game }: { game: Game }) {
-  const style = { "--c": game.color } as CSSProperties;
+export default function GameCard({ game, index }: { game: Game; index: number }) {
+  const style = { "--c": game.color, "--tilt": `${index % 2 ? 0.6 : -0.6}deg` } as CSSProperties;
   const body = (
     <>
-      <div className="card-top">
-        <div className="card-emoji" aria-hidden>{game.emoji}</div>
-        {game.component ? <span className="arrow" aria-hidden>→</span> : <span className="badge">Soon</span>}
+      <span className="card-num">{String(index + 1).padStart(2, "0")}</span>
+      {!game.component && <span className="stamp">Soon</span>}
+      <Art name={game.art} />
+      <div className="card-text">
+        <h3>{game.title}</h3>
+        <p>{game.description}</p>
       </div>
-      <h3>{game.title}</h3>
-      <p>{game.description}</p>
     </>
   );
 

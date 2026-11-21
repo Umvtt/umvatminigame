@@ -30,14 +30,18 @@ export default function Home() {
   return (
     <main className="wrap">
       <section className="hero">
-        <h1>{SITE.tagline}</h1>
+        <h1>
+          Tiny games.
+          <br />
+          <span className="hl">Zero fluff.</span>
+        </h1>
         <p>{SITE.description}</p>
         <div className="search-wrap">
           <input
             ref={input}
             className="search"
             type="search"
-            placeholder="Search games"
+            placeholder="Find a game…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             aria-label="Search games"
@@ -45,10 +49,9 @@ export default function Home() {
           <span className="kbd" aria-hidden>/</span>
         </div>
       </section>
-      <div className="section-label">All games · {filtered.length}</div>
       <section className="grid">
-        {filtered.map((g) => <GameCard key={g.slug} game={g} />)}
-        {filtered.length === 0 && <p className="empty">No games match “{q}”.</p>}
+        {filtered.map((g) => <GameCard key={g.slug} game={g} index={games.indexOf(g)} />)}
+        {filtered.length === 0 && <p className="empty">Nothing matches “{q}”.</p>}
       </section>
     </main>
   );
