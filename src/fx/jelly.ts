@@ -2,7 +2,11 @@
  * The jelly engine: one rAF loop that drives every physical effect on the page.
  *
  *  [data-jelly]   spring squash/stretch + skew. Poked on hover (by pointer speed) and on press.
- *  [data-goo]     the cursor droplet melts into it (liquid bridge) when close.
+ *  [data-goo]     sprouts a gooey tendril that reaches for the cursor when it gets close.
+ *
+ * On mouse devices the native cursor is hidden and replaced by a jelly droplet with a little
+ * trail: it stretches with speed, swells over clickable things (tinted to match them), squishes
+ * and splashes on click, and turns into an upright bar over text fields.
  *  [data-shy]     leans away from the pointer, then peeks back if you wait.
  *  [data-eyes]    its [data-pupil] children look at the pointer (or away, inside a shy element).
  *  [data-inflate] variable font weight swells as the pointer gets near.
@@ -84,13 +88,24 @@ export function installJelly() {
   let moved = true; // pointer moved / page scrolled since the last frame
   let busyUntil = 0; // keep updating for a moment after the last movement so everything settles
 
-  // goo cursor parts (rendered by <GooCursor />)
+  // the cursor (rendered by <GooCursor />)
   const gooFilter = document.getElementById("goo-filter");
   const gooGroup = document.getElementById("goo-group");
-  const drops = [0, 1, 2, 3, 4].map((i) => document.getElementById(`goo-drop-${i}`));
-  const magnet = document.getElementById("goo-magnet");
+  const shine = document.getElementById("goo-shine");
+  const lead = document.getElementById("goo-lead");
+  const gloss = document.getElementById("goo-gloss");
+  const bar = document.getElementById("goo-bar");
+  const gooSvg = gooGroup?.closest("svg") ?? null;
+  const neck = document.getElementById("goo-neck");
+  const drops = [1, 2, 3, 4].map((i) => document.getElementById(`goo-drop-${i}`));
+  const splashEls = [0, 1, 2, 3, 4, 5].map((i) => document.getElementById(`goo-splash-${i}`));
   const trail = drops.map(() => ({ x: -999, y: -999 }));
-  let magnetEl: HTMLElement | null = null;
+  const splash = splashEls.map(() => ({ x: 0, y: 0, vx: 0, vy: 0, life: 0 }));
+  const cur = { r: 7, tm: 0, vx: 0, vy: 0, lx: NaN, ly: NaN, press: { x: 0, v: 0 } as Spring };
+  let aim: { kind: "none" | "ui" | "text"; el: Element | null } = { kind: "none", el: null };
+  let neckEl: HTMLElement | null = null;
+  const useCursor = fine && !!gooGroup && !!lead;
+  if (useCursor) document.documentElement.classList.add("goo-cursor");
 
   // cached element lists, refreshed when the DOM changes
   let lists = { shy: [] as HTMLElement[], eyes: [] as HTMLElement[], inflate: [] as HTMLElement[], goo: [] as HTMLElement[] };
@@ -117,6 +132,7 @@ export function installJelly() {
     } else {
       p.vx = p.vy = 0;
       for (const t of trail) { t.x = e.clientX; t.y = e.clientY; }
+      cur.lx = cur.ly = NaN;
     }
     p.x = e.clientX;
     p.y = e.clientY;
@@ -125,7 +141,21 @@ export function installJelly() {
     moved = true;
   };
   const onOver = (e: PointerEvent) => {
-    const el = e.target instanceof Element ? e.target.closest<HTMLElement>("[data-jelly]") : null;
+    // what is the cursor over? (decides its size, colour and shape)
+    const t = e.target instanceof Element ? e.target : null;
+    const text = t?.closest('textarea, [contenteditable="true"], input:not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"]):not([type="range"])') ?? null;
+    const ui = text ? null : t?.closest('a, button, label, summary, select, [role="button"], [data-jelly], [data-goo]') ?? null;
+    const next = text ? { kind: "text" as const, el: text } : ui ? { kind: "ui" as const, el: ui } : { kind: "none" as const, el: null };
+    if (gooSvg && next.el !== aim.el) {
+      // tint to the deep shade of the jelly underneath so it stays visible on top of it
+      const flavoured = next.el?.closest('[class*="hue-"]');
+      if (next.kind === "ui" && flavoured) setVar(gooSvg, "--drop-now", getComputedStyle(next.el as Element).getPropertyValue("--jelly-deep").trim());
+      else if (next.kind === "text" && flavoured) setVar(gooSvg, "--drop-now", "var(--ink)");
+      else if (next.kind !== "none") setVar(gooSvg, "--drop-now", "var(--text)");
+      else clearVar(gooSvg, "--drop-now");
+    }
+    aim = next;
+    const el = t?.closest<HTMLElement>("[data-jelly]") ?? null;
     if (el && el !== hovered) {
       const speed = Math.hypot(p.vx, p.vy);
       poke(el, clamp(speed * 0.00006, 0.02, 0.07), clamp(p.vx * 0.003, -5, 5));
@@ -135,6 +165,20 @@ export function installJelly() {
   const onDown = (e: PointerEvent) => {
     const el = e.target instanceof Element ? e.target.closest<HTMLElement>("[data-jelly]") : null;
     if (el && !(el as HTMLButtonElement).disabled) poke(el, 0.11);
+    if (useCursor && e.pointerType === "mouse") {
+      // squish + a little splash of droplets
+      cur.press.v += 0.3 * W;
+      splash.forEach((d, i) => {
+        const a = (i / splash.length) * Math.PI * 2 + Math.random() * 0.8;
+        const sp = 150 + Math.random() * 130;
+        d.x = e.clientX;
+        d.y = e.clientY;
+        d.vx = Math.cos(a) * sp;
+        d.vy = Math.sin(a) * sp - 60;
+        d.life = 1;
+      });
+      moved = true;
+    }
     if (e.pointerType !== "mouse") {
       p.x = e.clientX;
       p.y = e.clientY;
@@ -243,72 +287,140 @@ export function installJelly() {
       });
     }
 
-    // goo cursor: a droplet with a trail that bridges into nearby [data-goo] elements
-    if (gooRects && gooGroup) {
+    // the cursor: lead droplet on the pointer, a little trail, a tendril from nearby jellies, a splash
+    if (gooRects && gooGroup && lead && useCursor) {
+      let x0 = p.x - 30, y0 = p.y - 30, x1 = p.x + 30, y1 = p.y + 30;
+      const grow = (x: number, y: number, r: number) => {
+        x0 = Math.min(x0, x - r); y0 = Math.min(y0, y - r);
+        x1 = Math.max(x1, x + r); y1 = Math.max(y1, y + r);
+      };
+      let settling = false;
+
+      // stretch along the direction of travel
+      const fvx = Number.isNaN(cur.lx) ? 0 : (p.x - cur.lx) / Math.max(dt, 0.001);
+      const fvy = Number.isNaN(cur.ly) ? 0 : (p.y - cur.ly) / Math.max(dt, 0.001);
+      cur.lx = p.x;
+      cur.ly = p.y;
+      cur.vx += (fvx - cur.vx) * 0.25;
+      cur.vy += (fvy - cur.vy) * 0.25;
+      const speed = Math.hypot(cur.vx, cur.vy);
+      if (speed > 5) settling = true;
+
+      // size for whatever is underneath; over text fields the droplet shrinks into a crisp text bar
+      const tr = aim.kind === "ui" ? 10.5 : aim.kind === "text" ? 2.4 : 7;
+      const ttm = aim.kind === "text" ? 1 : 0;
+      cur.r += (tr - cur.r) * 0.25;
+      cur.tm += (ttm - cur.tm) * 0.25;
+      if (Math.abs(cur.r - tr) > 0.02 || Math.abs(cur.tm - ttm) > 0.01) settling = true;
+
+      // press squish
+      const ps = cur.press;
+      ps.v += (-K * ps.x - C * ps.v) * dt;
+      ps.x += ps.v * dt;
+      if (Math.abs(ps.x) > 1e-3 || Math.abs(ps.v) > 1e-2) settling = true;
+
+      const textish = cur.tm > 0.5;
+      const st = textish ? 0 : Math.min(0.5, speed / 2400);
+      const ang = ((Math.atan2(cur.vy, cur.vx) * 180) / Math.PI).toFixed(1);
+      const shape =
+        `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${ang}) scale(${(1 + st).toFixed(3)} ${(1 - st * 0.5).toFixed(3)}) rotate(${-ang}) ` +
+        `scale(${(1 + ps.x).toFixed(3)} ${(1 - ps.x).toFixed(3)})`;
+      setAttr(lead, "r", cur.r.toFixed(2));
+      setAttr(lead, "transform", shape);
+      grow(p.x, p.y, cur.r * 2.6);
+      if (gloss) {
+        setAttr(gloss, "transform", shape);
+        setAttr(gloss, "cx", (-cur.r * 0.3).toFixed(2));
+        setAttr(gloss, "cy", (-cur.r * 0.38).toFixed(2));
+        setAttr(gloss, "rx", (cur.r * 0.32).toFixed(2));
+        setAttr(gloss, "ry", (cur.r * 0.2).toFixed(2));
+        setAttr(gloss, "opacity", textish ? "0" : "0.85");
+      }
+      if (bar) {
+        const h = 22 * cur.tm;
+        setAttr(bar, "transform", `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) scale(${(1 + ps.x * 0.5).toFixed(3)} 1)`);
+        setAttr(bar, "y", (-h / 2).toFixed(2));
+        setAttr(bar, "height", h.toFixed(2));
+        setAttr(bar, "opacity", Math.min(1, cur.tm * 1.4).toFixed(2));
+      }
+
+      // trail
       let tx = p.x, ty = p.y;
-      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
       trail.forEach((t, i) => {
-        const ease = i === 0 ? 0.6 : 0.34 - i * 0.04;
+        const ease = 0.42 - i * 0.07;
         t.x += (tx - t.x) * ease;
         t.y += (ty - t.y) * ease;
         tx = t.x;
         ty = t.y;
-        x0 = Math.min(x0, t.x); x1 = Math.max(x1, t.x);
-        y0 = Math.min(y0, t.y); y1 = Math.max(y1, t.y);
+        grow(t.x, t.y, 8);
         const el = drops[i];
         if (el) setAttr(el, "transform", `translate(${t.x.toFixed(1)} ${t.y.toFixed(1)})`);
       });
-      if (gooGroup.classList.contains("is-hidden") === p.inside) gooGroup.classList.toggle("is-hidden", !p.inside);
+      const tail = trail[trail.length - 1];
+      if (Math.abs(tail.x - p.x) > 0.4 || Math.abs(tail.y - p.y) > 0.4) settling = true;
 
-      let best: HTMLElement | null = null;
-      let bestR: DOMRect | null = null;
-      let bestD = 70;
-      lists.goo.forEach((el, i) => {
+      // tendril: the nearest jelly reaches out for the cursor as it approaches (never drawn over it)
+      let best = -1, bestD = 42;
+      lists.goo.forEach((_, i) => {
         const r = gooRects[i];
         if (r.bottom < 0 || r.top > innerHeight) return;
         const d = edgeDist(r, p.x, p.y);
-        if (d < bestD) { bestD = d; best = el; bestR = r; }
+        if (d > 0.5 && d < bestD) { bestD = d; best = i; }
       });
-      if (best !== magnetEl) {
-        magnetEl = best;
-        const color = best ? getComputedStyle(best).getPropertyValue("--jelly").trim() : "";
-        if (color) setVar(gooGroup, "--drop-now", color);
-        else clearVar(gooGroup, "--drop-now");
-      }
-      if (magnet) {
-        const r = bestR as DOMRect | null;
-        if (r) {
-          const inset = Math.min(5, r.height / 6);
-          const x = r.left + inset, y = r.top + inset;
-          const w = Math.max(0, r.width - inset * 2), h = Math.max(0, r.height - inset * 2);
-          setAttr(magnet, "x", x.toFixed(0));
-          setAttr(magnet, "y", y.toFixed(0));
-          setAttr(magnet, "width", w.toFixed(0));
-          setAttr(magnet, "height", h.toFixed(0));
-          setAttr(magnet, "rx", Math.min(26, r.height / 3).toFixed(0));
-          // only the part of the shape near the droplet can visibly merge with it
-          const nx0 = Math.max(x, p.x - 90), nx1 = Math.min(x + w, p.x + 90);
-          const ny0 = Math.max(y, p.y - 90), ny1 = Math.min(y + h, p.y + 90);
-          if (nx0 < nx1 && ny0 < ny1) {
-            x0 = Math.min(x0, nx0); x1 = Math.max(x1, nx1);
-            y0 = Math.min(y0, ny0); y1 = Math.max(y1, ny1);
+      if (neck) {
+        if (best >= 0 && p.inside) {
+          const r = gooRects[best];
+          const ex = clamp(p.x, r.left, r.right), ey = clamp(p.y, r.top, r.bottom);
+          const nx = (p.x - ex) / bestD, ny = (p.y - ey) / bestD;
+          const t = 1 - bestD / 42;
+          const reach = bestD * (0.25 + 0.62 * t);
+          // starts exactly at the edge and only grows outward
+          const cx = ex + (nx * reach) / 2, cy = ey + (ny * reach) / 2;
+          setAttr(neck, "transform", `translate(${cx.toFixed(1)} ${cy.toFixed(1)}) rotate(${((Math.atan2(ny, nx) * 180) / Math.PI).toFixed(1)})`);
+          setAttr(neck, "rx", (reach / 2 + 2).toFixed(1));
+          setAttr(neck, "ry", (2 + 4.5 * t * t).toFixed(1));
+          const el = lists.goo[best];
+          if (el !== neckEl) {
+            neckEl = el;
+            setAttr(neck, "style", `fill:${getComputedStyle(el).getPropertyValue("--jelly").trim() || "var(--drop)"}`);
           }
+          grow(cx, cy, reach);
         } else {
-          setAttr(magnet, "width", "0");
-          setAttr(magnet, "height", "0");
+          setAttr(neck, "rx", "0");
+          setAttr(neck, "ry", "0");
         }
       }
-      // keep the expensive blur limited to the area around the droplet
+
+      // splash
+      splash.forEach((d, i) => {
+        const el = splashEls[i];
+        if (!el) return;
+        if (d.life > 0) {
+          d.life = Math.max(0, d.life - dt / 0.5);
+          d.vy += 700 * dt;
+          d.x += d.vx * dt;
+          d.y += d.vy * dt;
+          grow(d.x, d.y, 6);
+          settling = true;
+        }
+        setAttr(el, "r", d.life > 0 ? (2 + 3 * Math.sqrt(d.life)).toFixed(2) : "0");
+        setAttr(el, "transform", `translate(${d.x.toFixed(1)} ${d.y.toFixed(1)})`);
+      });
+
+      const hidden = !p.inside;
+      if (gooGroup.classList.contains("is-hidden") !== hidden) {
+        gooGroup.classList.toggle("is-hidden", hidden);
+        shine?.classList.toggle("is-hidden", hidden);
+      }
+      // keep the blur limited to the area around the cursor
       if (gooFilter) {
-        const pad = 40;
+        const pad = 16;
         setAttr(gooFilter, "x", (x0 - pad).toFixed(0));
         setAttr(gooFilter, "y", (y0 - pad).toFixed(0));
         setAttr(gooFilter, "width", (x1 - x0 + pad * 2).toFixed(0));
         setAttr(gooFilter, "height", (y1 - y0 + pad * 2).toFixed(0));
       }
-      // keep going until the trail has caught up with the pointer
-      const tail = trail[trail.length - 1];
-      if (Math.abs(tail.x - p.x) > 0.5 || Math.abs(tail.y - p.y) > 0.5) busyUntil = Math.max(busyUntil, now + 50);
+      if (settling) busyUntil = Math.max(busyUntil, now + 60);
     }
   };
 

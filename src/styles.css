@@ -39,7 +39,7 @@
   --sun-c: #ffe08a; --sun-glow: rgba(255, 214, 110, 0.55); --sun-x: 97%; --sun-y: 3%;
   --stars: 0; --bubble-edge: rgba(43, 29, 58, 0.12);
   --plate: #ffffff; --plate-rim: #ece6f5;
-  --drop: #b8a8ff;
+  --drop: #7b68f0;
 
   --display: "Gluten", "Comic Sans MS", ui-rounded, cursive;
   --sans: "Nunito", ui-rounded, system-ui, sans-serif;
@@ -54,7 +54,7 @@
   --text: #3d2638; --muted: #7d6273;
   --mascot: #ffc3a6; --mascot-deep: #e27a5a;
   --sun-c: #ffb37f; --sun-glow: rgba(255, 160, 110, 0.5); --sun-x: -1%; --sun-y: 38%;
-  --plate: #fffaf6; --plate-rim: #f4e3db; --drop: #ffab95;
+  --plate: #fffaf6; --plate-rim: #f4e3db; --drop: #ef7458;
 }
 :root[data-time="evening"] {
   --sky-1: #34285a; --sky-2: #86506f;
@@ -62,7 +62,7 @@
   --mascot: #ffab91; --mascot-deep: #d65f58;
   --sun-c: #ff9670; --sun-glow: rgba(255, 120, 90, 0.45); --sun-x: 101%; --sun-y: 40%;
   --stars: 0.45; --bubble-edge: rgba(255, 255, 255, 0.2);
-  --plate: #fbf3f6; --plate-rim: #ead6e3; --drop: #ff9fb8;
+  --plate: #fbf3f6; --plate-rim: #ead6e3; --drop: #ffd3e1;
   color-scheme: dark;
 }
 :root[data-time="night"] {
@@ -71,7 +71,7 @@
   --mascot: #a5b8ff; --mascot-deep: #5a5fd0;
   --sun-c: #f1efff; --sun-glow: rgba(200, 200, 255, 0.25); --sun-x: 95%; --sun-y: 6%;
   --stars: 1; --bubble-edge: rgba(255, 255, 255, 0.16);
-  --plate: #f4f3ff; --plate-rim: #dcdaf5; --drop: #9d8cff;
+  --plate: #f4f3ff; --plate-rim: #dcdaf5; --drop: #c2b8ff;
   color-scheme: dark;
 }
 
@@ -188,9 +188,13 @@ main { flex: 1 0 auto; position: relative; z-index: 2; }
 }
 
 /* ---------- goo cursor ---------- */
-.goo { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; overflow: visible; }
-#goo-group { fill: var(--drop-now, var(--drop)); transition: fill 0.35s, opacity 0.3s; opacity: 0.9; }
-#goo-group.is-hidden { opacity: 0; }
+/* the jelly cursor sits above everything; the native cursor is hidden while it's active */
+.goo { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1000; pointer-events: none; overflow: visible; }
+#goo-group { fill: var(--drop-now, var(--drop)); transition: fill 0.25s, opacity 0.2s; }
+#goo-shine { fill: #fff; transition: opacity 0.2s; }
+#goo-bar { fill: var(--drop-now, var(--drop)); filter: drop-shadow(0 1px 1px rgba(26, 16, 48, 0.35)); }
+#goo-group.is-hidden, #goo-shine.is-hidden { opacity: 0; }
+.goo-cursor, .goo-cursor * { cursor: none !important; }
 @media not all and (pointer: fine) { .goo { display: none; } }
 
 /* ---------- header / footer ---------- */
