@@ -1,32 +1,33 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { GREETING } from "../fx/daylight";
-import { useDaylight } from "../hooks/useDaylight";
+import { games } from "../games/registry";
 import { SITE } from "../site";
-import Blobby from "./Blobby";
+import Mark from "./Mark";
+
+function LocalTime() {
+  const fmt = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const [t, setT] = useState(fmt);
+  useEffect(() => {
+    const id = window.setInterval(() => setT(fmt()), 15_000);
+    return () => window.clearInterval(id);
+  }, []);
+  return <time>{t}</time>;
+}
 
 export default function Header() {
-  const { phase, cycle, isLive } = useDaylight();
+  const available = games.filter((g) => g.component).length;
   return (
     <header className="site-header">
       <div className="wrap header-inner">
-        <Link to="/" className="brand" aria-label={`${SITE.name} home`}>
-          <Blobby size={42} />
-          <span className="brand-name" aria-hidden>
-            {[...SITE.name.toLowerCase()].map((ch, i) => (
-              <span key={i} data-jelly style={{ transitionDelay: `${i * 30}ms` }}>{ch}</span>
-            ))}
-          </span>
+        <Link to="/" className="brand">
+          <Mark />
+          <span>{SITE.name}</span>
         </Link>
-        <button
-          type="button"
-          className="greet"
-          onClick={cycle}
-          data-jelly
-          title={isLive ? "Follows your local time. Click to peek at other times of day." : "Click to change the time of day"}
-        >
-          <span className={`orb orb-${phase}`} aria-hidden />
-          <span key={phase} className="greet-text">{GREETING[phase]}</span>
-        </button>
+        <div className="header-meta mono">
+          <span className="hide-sm">{String(available).padStart(2, "0")} of {String(games.length).padStart(2, "0")} available</span>
+          <span className="sep hide-sm" aria-hidden />
+          <span>Local <LocalTime /></span>
+        </div>
       </div>
     </header>
   );

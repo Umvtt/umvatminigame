@@ -1,25 +1,24 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import GameCard from "../components/GameCard";
-import Blobby from "../components/Blobby";
+import { useEffect, useMemo, useRef, useState } from "react";
+import GameRow from "../components/GameRow";
+import Preview from "../components/Preview";
 import Roll from "../components/Roll";
-import SplitText from "../components/SplitText";
-import { reducedMotion } from "../fx/jelly";
 import { games } from "../games/registry";
-import { useTypewriter } from "../hooks/useTypewriter";
+import type { Game } from "../games/types";
 import { SITE } from "../site";
+import { vars } from "../util";
 
 const isEditable = (el: EventTarget | null) =>
   el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
-
-const LEAVE_MS = 220;
-const PHRASES = ["poke around…", ...[...new Set(games.flatMap((g) => g.tags ?? []))].map((t) => `something ${t}?`), "surprise me"];
+const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Home() {
   const [q, setQ] = useState("");
-  const [focused, setFocused] = useState(false);
+  const [hover, setHover] = useState<Game | null>(null);
   const input = useRef<HTMLInputElement>(null);
-  const grid = useRef<HTMLElement>(null);
-  const placeholder = useTypewriter(PHRASES, !focused && q === "");
+
+  useEffect(() => {
+    document.title = `${SITE.name} — ${SITE.tagline}`;
+  }, []);
 
   // Press "/" to focus search (but never steal it while the user is typing elsewhere)
   useEffect(() => {
@@ -35,112 +34,57 @@ export default function Home() {
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return games;
-    return games.filter((g) =>
-      [g.title, g.description, ...(g.tags ?? [])].join(" ").toLowerCase().includes(s),
-    );
+    return games.filter((g) => [g.title, g.description, ...(g.tags ?? [])].join(" ").toLowerCase().includes(s));
   }, [q]);
 
-  // Cards that drop out of the filter play an exit animation before they're removed.
-  const [shown, setShown] = useState(filtered);
-  const [leaving, setLeaving] = useState<Set<string>>(() => new Set());
-  useEffect(() => {
-    const keep = new Set(filtered.map((g) => g.slug));
-    const out = shown.filter((g) => !keep.has(g.slug)).map((g) => g.slug);
-    if (out.length === 0 || reducedMotion()) {
-      setLeaving(new Set());
-      setShown(filtered);
-      return;
-    }
-    setLeaving(new Set(out));
-    const id = window.setTimeout(() => {
-      setLeaving(new Set());
-      setShown(filtered);
-    }, LEAVE_MS);
-    return () => window.clearTimeout(id);
-  }, [filtered]);
-
-  // FLIP: cards that move because others appeared/disappeared glide to their new spot.
-  const positions = useRef(new Map<string, { x: number; y: number }>());
-  useLayoutEffect(() => {
-    const el = grid.current;
-    if (!el) return;
-    const kids = [...el.children] as HTMLElement[];
-    const next = new Map<string, { x: number; y: number }>();
-    for (const k of kids) {
-      const key = k.dataset.key;
-      if (!key) continue;
-      const now = { x: k.offsetLeft, y: k.offsetTop };
-      next.set(key, now);
-      const prev = positions.current.get(key);
-      if (prev && !reducedMotion() && (prev.x !== now.x || prev.y !== now.y)) {
-        k.animate(
-          [{ translate: `${prev.x - now.x}px ${prev.y - now.y}px` }, { translate: "0 0" }],
-          { duration: 520, easing: "cubic-bezier(.2,.9,.25,1)" },
-        );
-      }
-    }
-    positions.current = next;
-  }, [shown]);
+  const available = games.filter((g) => g.component).length;
 
   return (
     <>
       <section className="hero">
-        <div className="hero-text">
-          <h1><SplitText text={SITE.name.toLowerCase()} delay={0.1} idle squishy /></h1>
-          <p className="hero-desc fade-up" style={{ animationDelay: ".45s" }}>{SITE.description}</p>
-          <div className="search-wrap hue-1 fade-up" style={{ animationDelay: ".6s" }}>
-            <svg className="drips" aria-hidden>
-              <g filter="url(#goo-soft)">
-                <rect className="drip-bar" x="22" y="0" height="10" rx="5" />
-                <circle className="drip" cx="18%" cy="6" r="6" />
-                <circle className="drip" cx="47%" cy="6" r="7" />
-                <circle className="drip" cx="78%" cy="6" r="5" />
-              </g>
-            </svg>
-            <label className={`search ${q ? "has-value" : ""}`} data-goo>
-              <svg className="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden>
-                <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
-                <path d="M20 20l-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <input
-                ref={input}
-                type="search"
-                placeholder={placeholder}
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                onKeyDown={(e) => e.key === "Escape" && setQ("")}
-                aria-label="Search games"
-              />
-              {q ? (
-                <button type="button" className="search-clear" onClick={() => { setQ(""); input.current?.focus(); }} aria-label="Clear search">×</button>
-              ) : (
-                <kbd aria-hidden>/</kbd>
-              )}
-            </label>
-          </div>
-        </div>
-        <div className="hero-blob">
-          <Blobby size={230} />
-          <span className="hero-hint" aria-hidden>poke me</span>
+        <p className="eyebrow mono fade-in" style={vars({ "--delay": "0.05s" })}>{SITE.name} — {SITE.tagline}</p>
+        <h1 className="display">
+          <span className="line" style={vars({ "--i": 0 })}><span>Small games,</span></span>
+          <span className="line" style={vars({ "--i": 1 })}><span className="muted">made with care.</span></span>
+        </h1>
+        <div className="hero-foot">
+          <p className="lede fade-in" style={vars({ "--delay": "0.45s" })}>{SITE.description}</p>
+          <dl className="facts mono fade-in" style={vars({ "--delay": "0.55s" })}>
+            <div><dt>Available</dt><dd>{pad(available)}</dd></div>
+            <div><dt>In development</dt><dd>{pad(games.length - available)}</dd></div>
+            <div><dt>Price</dt><dd>Free</dd></div>
+          </dl>
         </div>
       </section>
 
-      <div className="section-head fade-up" style={{ animationDelay: ".7s" }}>
-        <h2>fresh from the fridge</h2>
-        <span aria-live="polite"><Roll value={filtered.length} /> of {games.length} jellies</span>
-      </div>
-      <section className="grid" ref={grid}>
-        {shown.map((g, i) => <GameCard key={g.slug} game={g} order={i} leaving={leaving.has(g.slug)} />)}
-      </section>
-      {filtered.length === 0 && !leaving.size && (
-        <div className="empty">
-          <Blobby size={90} mood="lost" />
-          <p>No jelly called "{q.trim()}". Yet.</p>
-          <button type="button" className="btn" onClick={() => setQ("")} data-jelly data-goo>show them all</button>
+      <section className="index" aria-labelledby="index-title">
+        <div className="index-bar fade-in" style={vars({ "--delay": "0.65s" })}>
+          <h2 id="index-title" className="eyebrow mono">Index</h2>
+          <label className="search">
+            <span className="visually-hidden">Search games</span>
+            <input
+              ref={input}
+              type="search"
+              placeholder="Search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && setQ("")}
+            />
+            <kbd className="mono" aria-hidden>/</kbd>
+          </label>
+          <span className="count mono" aria-live="polite"><Roll value={pad(filtered.length)} /> / {pad(games.length)}</span>
         </div>
-      )}
+        <ul className="rows" onMouseLeave={() => setHover(null)} onBlur={() => setHover(null)}>
+          {filtered.map((g, i) => <GameRow key={g.slug} game={g} order={i} onHover={setHover} />)}
+        </ul>
+        {filtered.length === 0 && (
+          <p className="empty">
+            Nothing matches “{q.trim()}”.{" "}
+            <button type="button" className="text-link" onClick={() => setQ("")}>Clear search</button>
+          </p>
+        )}
+      </section>
+      <Preview game={hover} />
     </>
   );
 }

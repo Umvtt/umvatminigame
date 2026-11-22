@@ -12,25 +12,25 @@ export default function Play() {
   const Component = useMemo(() => (game?.component ? lazy(game.component) : null), [game]);
 
   useEffect(() => {
-    if (game) document.title = `${game.title} · ${SITE.name}`;
-    return () => {
-      document.title = SITE.name;
-    };
+    if (game) document.title = `${game.title} — ${SITE.name}`;
   }, [game]);
 
-  if (!game) return <NotFound message="There's no game at this address. Maybe it melted." />;
+  if (!game) return <NotFound message="There's no game at this address." />;
 
   return (
     <GameFrame game={game}>
       {Component ? (
-        <Suspense fallback={<div className="loader" aria-label="Loading"><i /><i /><i /></div>}>
+        <Suspense fallback={<div className="loader mono" aria-label="Loading">Loading</div>}>
           <Component />
         </Suspense>
       ) : (
-        <div className="center soon">
+        <div className="soon">
           <div className="soon-art"><Art name={game.art} /></div>
-          <p className="muted">Still setting in the fridge. Come back when it's wobbly.</p>
-          <Link to="/" className="btn" data-jelly data-goo>play something else</Link>
+          <div>
+            <p className="eyebrow mono">In development</p>
+            <p className="lede">This one isn't finished yet. It will appear in the index as soon as it's ready.</p>
+            <Link to="/" className="button">Return to index <span aria-hidden>→</span></Link>
+          </div>
         </div>
       )}
     </GameFrame>

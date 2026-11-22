@@ -1,13 +1,14 @@
-import { useReveal } from "../hooks/useReveal";
 import { SITE } from "../site";
 
 export default function Footer() {
-  const ref = useReveal<HTMLElement>();
   return (
-    <footer ref={ref} className="site-footer reveal">
-      <div className="wrap footer-inner">
-        <span>{SITE.name.toLowerCase()} · best served chilled</span>
-        <span>no accounts · no ads · no rush</span>
+    <footer className="site-footer">
+      <div className="wrap footer-inner mono">
+        <span>© {new Date().getFullYear()} {SITE.name}</span>
+        <span className="hide-sm">Free to play. No accounts.</span>
+        <button type="button" className="to-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          Back to top <span aria-hidden>↑</span>
+        </button>
       </div>
     </footer>
   );
