@@ -1,6 +1,6 @@
 // Change the site name / copy here and it updates everywhere.
 export const SITE = {
   name: "Doodad",
-  tagline: "wobbly little games",
-  description: "Little games that wobble. Poke one and see what happens.",
+  tagline: "An index of small browser games",
+  description: "Short, precise games for spare moments. Free to play, nothing to install, no account required.",
 };
