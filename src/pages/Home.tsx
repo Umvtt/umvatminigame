@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import GameRow from "../components/GameRow";
-import Preview from "../components/Preview";
+import Preview, { type Hovered } from "../components/Preview";
 import Roll from "../components/Roll";
 import { games } from "../games/registry";
-import type { Game } from "../games/types";
 import { SITE } from "../site";
 import { vars } from "../util";
 
@@ -14,7 +13,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Home() {
   const [q, setQ] = useState("");
-  const [hover, setHover] = useState<Game | null>(null);
+  const [hover, setHover] = useState<Hovered>(null);
   const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -102,7 +101,7 @@ export default function Home() {
           </p>
         )}
       </section>
-      <Preview game={hover} />
+      <Preview hovered={hover} />
     </>
   );
 }

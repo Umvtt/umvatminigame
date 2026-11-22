@@ -141,7 +141,7 @@ main { flex: 1 0 auto; }
   transition: opacity 0.5s var(--ease), background 0.3s;
 }
 .row-no { font-size: 12px; color: var(--muted); }
-.row-main { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.row-main { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
 .row-title { font-size: clamp(24px, 2.6vw, 34px); font-weight: 500; letter-spacing: -0.03em; line-height: 1.1; transition: transform 0.7s var(--ease); }
 .row-desc { font-size: 14px; color: var(--muted); transition: transform 0.7s var(--ease) 0.03s; }
 .row-tag, .row-status { font-size: 12px; color: var(--muted); text-transform: capitalize; }
@@ -173,7 +173,7 @@ a.row-link:focus-visible { outline-offset: 0; }
 
 /* the trailing preview plate */
 .preview {
-  position: fixed; left: 0; top: 0; z-index: 40; width: 300px; height: 220px; pointer-events: none;
+  position: fixed; left: 0; top: 0; z-index: 40; width: 300px; height: 219px; pointer-events: none;
   will-change: transform;
 }
 .preview-inner {

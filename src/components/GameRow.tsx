@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import type { Game } from "../games/types";
+import type { Hovered } from "./Preview";
 import { useReveal } from "../hooks/useReveal";
 import { numberOf, vars } from "../util";
 import Art from "./Art";
 
 /** One entry in the index. Available games link to their page; the rest are listed but inert. */
-export default function GameRow({ game, order, onHover }: { game: Game; order: number; onHover: (g: Game | null) => void }) {
+export default function GameRow({ game, order, onHover }: { game: Game; order: number; onHover: (h: Hovered) => void }) {
   const playable = Boolean(game.component);
   const ref = useReveal<HTMLLIElement>();
   const body = (
@@ -33,8 +34,8 @@ export default function GameRow({ game, order, onHover }: { game: Game; order: n
       ref={ref}
       className="row reveal"
       style={vars({ "--delay": `${0.15 + Math.min(order, 8) * 0.07}s` })}
-      onMouseEnter={() => onHover(game)}
-      onFocus={() => onHover(game)}
+      onMouseEnter={(e) => onHover({ game, row: e.currentTarget })}
+      onFocus={(e) => onHover({ game, row: e.currentTarget })}
     >
       {playable ? (
         <Link to={`/play/${game.slug}`} className="row-link">{body}</Link>
