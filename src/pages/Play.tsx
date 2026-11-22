@@ -29,7 +29,7 @@ export default function Play() {
           <div>
             <p className="eyebrow mono">In development</p>
             <p className="lede">This one isn't finished yet. It will appear in the index as soon as it's ready.</p>
-            <Link to="/" className="button">Return to index <span aria-hidden>→</span></Link>
+            <Link to="/" className="button">Return to index <span className="arrow" aria-hidden>→</span></Link>
           </div>
         </div>
       )}

@@ -7,7 +7,7 @@ import { numberOf, vars } from "../util";
 export default function GameFrame({ game, children }: { game: Game; children: ReactNode }) {
   return (
     <div className="game-page">
-      <Link to="/" className="back mono"><span aria-hidden>←</span> Index</Link>
+      <Link to="/" className="button button-ghost button-sm back"><span className="arrow back-arrow" aria-hidden>←</span> Back to index</Link>
       <header className="game-head">
         <p className="eyebrow mono fade-in" style={vars({ "--delay": "0.05s" })}>
           No. {numberOf(game)} — {(game.tags ?? []).join(", ")}
