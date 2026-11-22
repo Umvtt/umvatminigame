@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import GameRow from "../components/GameRow";
 import Preview from "../components/Preview";
 import Roll from "../components/Roll";
@@ -38,6 +39,7 @@ export default function Home() {
   }, [q]);
 
   const available = games.filter((g) => g.component).length;
+  const featured = games.find((g) => g.component);
 
   return (
     <>
@@ -48,7 +50,19 @@ export default function Home() {
           <span className="line" style={vars({ "--i": 1 })}><span className="muted">made with care.</span></span>
         </h1>
         <div className="hero-foot">
-          <p className="lede fade-in" style={vars({ "--delay": "0.45s" })}>{SITE.description}</p>
+          <div className="fade-in" style={vars({ "--delay": "0.45s" })}>
+            <p className="lede">{SITE.description}</p>
+            <div className="actions">
+              {featured && (
+                <Link to={`/play/${featured.slug}`} className="button">
+                  Play {featured.title} <span className="arrow" aria-hidden>→</span>
+                </Link>
+              )}
+              <a href="#index" className="button button-ghost" onClick={(e) => { e.preventDefault(); document.getElementById("index")?.scrollIntoView({ behavior: "smooth" }); }}>
+                Browse the index <span className="arrow down" aria-hidden>↓</span>
+              </a>
+            </div>
+          </div>
           <dl className="facts mono fade-in" style={vars({ "--delay": "0.55s" })}>
             <div><dt>Available</dt><dd>{pad(available)}</dd></div>
             <div><dt>In development</dt><dd>{pad(games.length - available)}</dd></div>
@@ -57,15 +71,19 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="index" aria-labelledby="index-title">
+      <section className="index" id="index" aria-labelledby="index-title">
         <div className="index-bar fade-in" style={vars({ "--delay": "0.65s" })}>
           <h2 id="index-title" className="eyebrow mono">Index</h2>
           <label className="search">
             <span className="visually-hidden">Search games</span>
+            <svg className="search-icon" viewBox="0 0 24 24" width="15" height="15" aria-hidden>
+              <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
             <input
               ref={input}
               type="search"
-              placeholder="Search"
+              placeholder="Search games"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setQ("")}
@@ -80,7 +98,7 @@ export default function Home() {
         {filtered.length === 0 && (
           <p className="empty">
             Nothing matches “{q.trim()}”.{" "}
-            <button type="button" className="text-link" onClick={() => setQ("")}>Clear search</button>
+            <button type="button" className="button button-ghost button-sm" onClick={() => setQ("")}>Clear search</button>
           </p>
         )}
       </section>

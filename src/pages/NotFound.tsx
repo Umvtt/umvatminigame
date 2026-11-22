@@ -14,7 +14,7 @@ export default function NotFound({ message = "The page you were looking for does
         <span className="line" style={vars({ "--i": 0 })}><span>Page not found.</span></span>
       </h1>
       <p className="lede fade-in" style={vars({ "--delay": "0.35s" })}>{message}</p>
-      <Link to="/" className="button fade-in" style={vars({ "--delay": "0.45s" })}>Return to index <span aria-hidden>→</span></Link>
+      <Link to="/" className="button fade-in" style={vars({ "--delay": "0.45s" })}>Return to index <span className="arrow" aria-hidden>→</span></Link>
     </div>
   );
 }

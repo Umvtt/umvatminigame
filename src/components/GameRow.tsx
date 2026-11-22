@@ -20,7 +20,11 @@ export default function GameRow({ game, order, onHover }: { game: Game; order: n
         <i className={`dot ${playable ? "is-on" : ""}`} aria-hidden />
         {playable ? "Available" : "In development"}
       </span>
-      <span className="row-go" aria-hidden>→</span>
+      {playable ? (
+        <span className="row-go" aria-hidden>Play <span className="arrow">→</span></span>
+      ) : (
+        <span className="row-go is-soon" aria-hidden>Soon</span>
+      )}
       <span className="row-thumb" aria-hidden><Art name={game.art} /></span>
     </>
   );
